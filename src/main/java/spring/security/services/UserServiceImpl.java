@@ -2,7 +2,6 @@ package spring.security.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,13 +13,14 @@ import spring.security.config.jwt.JwtUtils;
 import spring.security.domain.ERole;
 import spring.security.domain.User;
 import spring.security.dto.request.SignUpRequest;
-import spring.security.dto.response.MessageResponse;
+import spring.security.exception.CustomException;
+import spring.security.exception.ExceptionStatus;
 import spring.security.repository.UserRepository;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-//@Transactional(readOnly = true)
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
@@ -28,14 +28,19 @@ public class UserServiceImpl implements UserService{
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public Long singUp(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException();
+    @Transactional
+    public SignUpRequest singUp(SignUpRequest request) {
+        if (userRepository.existsByEmail(request.email())) {
+            throw new CustomException(ExceptionStatus.DUPLICATE_EMAIL);
         }
-        user.setUserRole(ERole.ROLE_USER);
-        user.setPassword(hashPassword(user.getPassword()));
 
-        return userRepository.save(user).getUserId();
+        User entity = request.toEntity();
+        entity.setUserRole(ERole.ROLE_USER);
+        entity.setPassword(hashPassword(request.password()));
+
+        userRepository.save(entity);
+
+        return request;
     }
 
     @Override

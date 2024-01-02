@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import spring.security.config.jwt.JwtUtils;
 import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
+import spring.security.dto.response.DataMessageResponse;
 import spring.security.dto.response.JwtResponse;
+import spring.security.exception.ExceptionStatusProvider;
 import spring.security.repository.UserRepository;
+import spring.security.services.MessageResponseService;
 import spring.security.services.UserDetailsImpl;
 import spring.security.services.UserService;
 
@@ -38,14 +41,15 @@ public class AuthController {
 
     private final JwtUtils jwtUtils;
 
+    private final MessageResponseService message;
+
     @PostMapping("/signup")
-    public ResponseEntity<String> signUpUser(@Validated @RequestBody SignUpRequest request, Errors errors) {
+    public DataMessageResponse<SignUpRequest> signUpUser(@Validated @RequestBody SignUpRequest request, Errors errors) {
         if (errors.hasErrors()) {
-            // TODO exception 처리
-           log.error("errors={}", errors);
+            ExceptionStatusProvider.throwError(errors);
         }
-        userService.singUp(request.toEntity());
-        return ResponseEntity.ok("회원가입 성공");
+
+        return message.getDataResponse(userService.singUp(request));
     }
 
     @PostMapping("/signin")
