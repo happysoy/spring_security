@@ -19,7 +19,7 @@ import java.util.Set;
 public class User extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
 
     @Column(nullable = false)
     private String username;
@@ -37,7 +37,9 @@ public class User extends BaseTimeEntity {
     private String status;
 
     // TODO refreshToken Redis 로 관리
-    private String refreshToken;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name="refresh_token_id", referencedColumnName = "refresh_token_id")
+    private RefreshToken refreshToken;
 
     public User(String username, String email, String password) {
         this.username = username;

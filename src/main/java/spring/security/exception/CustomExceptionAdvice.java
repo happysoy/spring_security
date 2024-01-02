@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import spring.security.dto.response.CodeMessageResponse;
-import spring.security.services.MessageResponseService;
+import spring.security.service.MessageResponseService;
 
 @RestControllerAdvice
 @RequiredArgsConstructor

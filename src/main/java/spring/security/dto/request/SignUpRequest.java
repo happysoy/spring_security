@@ -18,11 +18,11 @@ public record SignUpRequest(
         String password
 
 ) {
-        public User toEntity() {
+        public User toEntity(String hashPassword) {
                 return User.builder()
                         .username(username)
                         .email(email)
-                        .password(password)
+                        .password(hashPassword)
                         .build();
         }
 }

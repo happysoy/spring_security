@@ -1,4 +1,4 @@
-package spring.security.services;
+package spring.security.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("해당 이메일의 유저를 찾을 수 없습니다 => " + email));
         return UserDetailsImpl.build(user); // 정의한 객체 형태로 반환
     }
+
 
 
 }

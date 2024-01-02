@@ -1,4 +1,4 @@
-package spring.security.services;
+package spring.security.service;
 
 import org.springframework.stereotype.Service;
 import spring.security.dto.response.CodeMessageResponse;
