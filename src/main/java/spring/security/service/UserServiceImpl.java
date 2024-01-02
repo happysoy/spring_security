@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import spring.security.config.jwt.JwtUtils;
 import spring.security.config.security.UserDetailsImpl;
 import spring.security.domain.ERole;
-import spring.security.domain.RefreshToken;
 import spring.security.domain.User;
 import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
@@ -27,6 +26,8 @@ import spring.security.exception.ExceptionStatusProvider;
 import spring.security.exception.response.MessageResponse;
 import spring.security.repository.UserRepository;
 
+import java.time.Duration;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -36,7 +37,7 @@ public class UserServiceImpl implements UserService{
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
-    private final RefreshTokenService refreshTokenService;
+    private final RedisService redisService;
 
     @Override
     @Transactional
@@ -54,6 +55,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> signIn(SignInRequest request) {
         // TODO 로그인 실패 예외처리
 
@@ -67,8 +69,12 @@ public class UserServiceImpl implements UserService{
 
         ResponseCookie jwtAccessCookie = jwtUtils.generateAccessJwtCookie(userDetails);
 
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-        ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken.getToken());
+        String refreshToken = jwtUtils.generateRefreshToken();
+        // TODO RedisServiceSet
+        long expiredTime = 30 * 1000; // 30초
+        redisService.setRedisTemplate(refreshToken, userDetails.getEmail(), Duration.ofMillis(expiredTime));
+        ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken);
+
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
@@ -77,24 +83,22 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
         String refreshToken = jwtUtils.getRefreshJwtFromCookies(request);
 
-        log.info("refreshToken={}", refreshToken);
         if ((refreshToken != null) && (!refreshToken.isEmpty())) {
-            return refreshTokenService.findByToken(refreshToken)
-                    .map(refreshTokenService::verifyExpiration)
-                    .map(RefreshToken::getUser)
+            String email = redisService.getRedisTemplateValue(refreshToken);
+            return userRepository.findByEmail(email)
                     .map(user->{
                         ResponseCookie jwtAccessCookie = jwtUtils.generateAccessJwtCookie(UserDetailsImpl.build(user));
                         return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
-                                .body(new MessageResponse("ACCESS TOKEN이 재발급 되었습니다"));
+                                .body(new MessageResponse("access token 재발급 성공"));
                     })
-                    .orElseThrow(()-> new CustomException(ExceptionStatus.DELETE_REFRESH_TOKEN));
+                    .orElseThrow(()-> new CustomException(ExceptionStatus.DB_EMPTY_REFRESH_TOKEN));
         }
-        // TODO exception handler
-        return ResponseEntity.badRequest().body(new MessageResponse("Refresh Token is empty!"));
+        return ResponseEntity.badRequest().body(new MessageResponse("refresh token이 http cookie에 없습니다"));
     }
 
     @Override

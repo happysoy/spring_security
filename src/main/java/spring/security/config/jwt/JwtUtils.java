@@ -5,16 +5,21 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 import spring.security.config.security.UserDetailsImpl;
+import spring.security.repository.UserRepository;
 
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * JWT 파싱, 생성, 검증 제공
@@ -30,20 +35,29 @@ public class JwtUtils {
     @Value("${jwt.access-expiration}")
     private long jwtAccessExpiration;
 
+    @Value("${jwt.refresh-expiration}")
+    private long jwtRefreshExpiration;
+
     @Value("${jwt.access-cookie-name}")
     private String jwtAccessCookie;
 
     @Value("${jwt.refresh-cookie-name}")
     private String jwtRefreshCookie;
 
+    private final UserRepository userRepository;
+
 
     /**
      * secret key 객체로 변환
      */
     public JwtUtils(@Value("${jwt.secret}") String secretKey,
-                    @Value("${jwt.access-expiration}") long jwtAccessExpiration) {
+                    @Value("${jwt.access-expiration}") long jwtAccessExpiration,
+//                    @Value("${jwt.refresh-expiration}") long jwtRefreshExpiration,
+                    UserRepository userRepository) {
         this.secretKey = secretKey;
         this.jwtAccessExpiration = jwtAccessExpiration;
+//        this.jwtRefreshExpiration = jwtRefreshExpiration;
+        this.userRepository = userRepository;
     }
     public Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
@@ -58,30 +72,16 @@ public class JwtUtils {
         return generateCookie(jwtAccessCookie, jwt, "/api");
     }
 
-//    public ResponseCookie generateAccessJwtCookie(User user) {
-//        String jwt = generateAccessTokenFromEmail(user.getUsername());// email 로 설정
-//        log.info("우루루까기={}", jwt);
-//        return generateCookie(jwtAccessCookie, jwt, "/api");
-//    }
-
     public ResponseCookie generateRefreshJwtCookie(String refreshToken) {
         return generateCookie(jwtRefreshCookie, refreshToken, "/api");
     }
 
-    public String getAccessJwtFromCookies(HttpServletRequest request) {
-        return getCookieValueByName(request, jwtAccessCookie);
-    }
+//    public String getAccessJwtFromCookies(HttpServletRequest request) {
+//        return getCookieValueByName(request, jwtAccessCookie);
+//    }
 
     public String getRefreshJwtFromCookies(HttpServletRequest request) {
         return getCookieValueByName(request, jwtRefreshCookie);
-    }
-
-    public String getEmailFromJwtToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key()).build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
     }
 
     private ResponseCookie generateCookie(String name, String value, String path) {
@@ -100,16 +100,6 @@ public class JwtUtils {
     /**
      * Token 관리
      */
-//    public String generateJwtAccessToken(Authentication authentication) {
-//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-//
-//        return Jwts.builder()
-//                .setSubject((userDetails.getEmail()))
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date((new Date()).getTime() + jwtAccessExpiration))
-//                .signWith(key(), SignatureAlgorithm.HS512)
-//                .compact();
-//    }
     public String generateAccessTokenFromEmail(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -117,6 +107,10 @@ public class JwtUtils {
                 .setExpiration(new Date((new Date()).getTime() + jwtAccessExpiration))
                 .signWith(key(), SignatureAlgorithm.HS512)
                 .compact();
+    }
+
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
     }
 
 
@@ -148,6 +142,8 @@ public class JwtUtils {
         }
         return false;
     }
+
+
 
 
 }

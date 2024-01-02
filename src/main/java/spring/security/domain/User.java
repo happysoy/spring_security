@@ -34,10 +34,6 @@ public class User extends BaseTimeEntity {
     @ColumnDefault("'ACTIVE'")
     private String status;
 
-    // TODO refreshToken Redis 로 관리
-    @OneToOne(mappedBy = "user", fetch= FetchType.LAZY)
-    private RefreshToken refreshToken;
-
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
@@ -47,6 +43,8 @@ public class User extends BaseTimeEntity {
     public void setUserRole(ERole role) {
         this.role = role;
     }
+
+    // TODO @Setter 로 전환?
     public void setPassword(String password) {
         this.password = password;
     }

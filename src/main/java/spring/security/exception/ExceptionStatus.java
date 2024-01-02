@@ -11,6 +11,7 @@ public enum ExceptionStatus {
      * 1000: 요청 성공
      */
     SUCCESS(true, 1000, "요청에 성공했습니다"),
+    REFRESH_ACCESS_TOKEN(true, 10001, "Access Token이 재발급되었습니다"),
 
     /**
      * 2100: request 에러
@@ -31,7 +32,7 @@ public enum ExceptionStatus {
     EMPTY_ACCESS_TOKEN(false, 2203, "Access Token 이 없습니다"),
     EMPTY_REFRESH_TOKEN(false, 2203, "Refresh Token 이 없습니다"),
     EXPIRED_REFRESH_TOKEN(false, 2204, "Refresh Token 이 만료되었습니다."),
-    DELETE_REFRESH_TOKEN(false, 2205, "Refresh Token 이 DB에 존재하지 않습니다"),
+    DB_EMPTY_REFRESH_TOKEN(false, 2205, "Refresh Token 을 재발급 받아야 합니다"),
 
     /**
      * 2200: response 에러

@@ -26,6 +26,11 @@ spring:
       path: /h2-console
       settings:
         web-allow-others: true
+  data:
+    redis:
+      host: localhost
+      port: 16379
+
 
 # terminal에서 평문 암호화
 jwt:
