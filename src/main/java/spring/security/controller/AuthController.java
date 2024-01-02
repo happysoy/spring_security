@@ -39,6 +39,9 @@ public class AuthController {
                     .body(new MessageResponse("이미 사용중인 이메일입니다"));
         }
 
+        /**
+         * TODO 서비스 로직 분리
+         */
         User user = new User(signUpRequest.username(), signUpRequest.email(), signUpRequest.password(), signUpRequest.role());
 
         userRepository.save(user);

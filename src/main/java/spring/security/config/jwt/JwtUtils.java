@@ -12,7 +12,9 @@ import spring.security.services.UserDetailsImpl;
 import java.security.Key;
 import java.util.Date;
 
-
+/**
+ * JWT 파싱, 생성, 검증 제공
+ */
 @Slf4j
 @Component
 public class JwtUtils {
@@ -30,7 +32,7 @@ public class JwtUtils {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         return Jwts.builder()
-                .setSubject((userDetails.getUsername()))
+                .setSubject((userDetails.getEmail()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpiration))
                 .signWith(key(), SignatureAlgorithm.HS512)
@@ -41,7 +43,7 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    public String getUsernameFromToken(String token) {
+    public String getEmailFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key())
                 .build()
