@@ -30,6 +30,8 @@ public enum ExceptionStatus {
     INVALID_TOKEN(false, 2200, "유효하지 않은 토큰입니다"),
     EMPTY_ACCESS_TOKEN(false, 2203, "Access Token 이 없습니다"),
     EMPTY_REFRESH_TOKEN(false, 2203, "Refresh Token 이 없습니다"),
+    EXPIRED_REFRESH_TOKEN(false, 2204, "Refresh Token 이 만료되었습니다."),
+    DELETE_REFRESH_TOKEN(false, 2205, "Refresh Token 이 DB에 존재하지 않습니다"),
 
     /**
      * 2200: response 에러
@@ -41,7 +43,7 @@ public enum ExceptionStatus {
     EMPTY_USER(false, 2204, "존재하지 않는 사용자입니다"),
     RESPONSE_ERROR(false, 2100, "값을 불러오는데 실패하였습니다.");
 
-    // token 에러
+
 
     private final boolean isSuccess;
     private final int code;

@@ -6,21 +6,19 @@ import lombok.Setter;
 
 import java.time.Instant;
 
-@Entity
-//@Table(name="\"refreshToken\"")
+@Entity(name="refreshToken")
 @Getter @Setter
 public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="refresh_token_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-
-    @OneToOne(mappedBy = "refreshToken", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name="user_id", referencedColumnName = "user_id")
     private User user;
 
-    @Column
+    @Column(nullable = false, unique = true)
     public String token;
 
     @Column

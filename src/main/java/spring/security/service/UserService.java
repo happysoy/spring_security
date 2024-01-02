@@ -1,5 +1,6 @@
 package spring.security.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
@@ -10,5 +11,6 @@ public interface UserService {
 
     ResponseEntity<?> signIn(SignInRequest signInRequest);
 
+    ResponseEntity<?> refreshToken(HttpServletRequest request);
     String hashPassword(String password);
 }

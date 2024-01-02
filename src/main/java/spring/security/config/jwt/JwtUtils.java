@@ -11,7 +11,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
-import spring.security.service.UserDetailsImpl;
+import spring.security.config.security.UserDetailsImpl;
 
 import java.security.Key;
 import java.util.Date;
@@ -58,14 +58,14 @@ public class JwtUtils {
         return generateCookie(jwtAccessCookie, jwt, "/api");
     }
 
-    public ResponseCookie generateAccessJwtCookie(User user) {
-        String jwt = generateAccessTokenFromEmail(user.getUsername());// email 로 설정
-        log.info("우루루까기={}", jwt);
-        return generateCookie(jwtAccessCookie, jwt, "/api");
-    }
+//    public ResponseCookie generateAccessJwtCookie(User user) {
+//        String jwt = generateAccessTokenFromEmail(user.getUsername());// email 로 설정
+//        log.info("우루루까기={}", jwt);
+//        return generateCookie(jwtAccessCookie, jwt, "/api");
+//    }
 
     public ResponseCookie generateRefreshJwtCookie(String refreshToken) {
-        return generateCookie(jwtRefreshCookie, refreshToken, "/api/auth/refreshtoken");
+        return generateCookie(jwtRefreshCookie, refreshToken, "/api");
     }
 
     public String getAccessJwtFromCookies(HttpServletRequest request) {

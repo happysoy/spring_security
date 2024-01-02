@@ -1,8 +1,8 @@
 package spring.security.service;
 
 import org.springframework.stereotype.Service;
-import spring.security.dto.response.CodeMessageResponse;
-import spring.security.dto.response.DataMessageResponse;
+import spring.security.exception.response.CodeMessageResponse;
+import spring.security.exception.response.DataMessageResponse;
 import spring.security.exception.ExceptionStatus;
 
 @Service

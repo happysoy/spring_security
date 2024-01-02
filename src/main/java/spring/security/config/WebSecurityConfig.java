@@ -18,7 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import spring.security.config.jwt.AuthEntryPoint;
 import spring.security.config.jwt.AuthTokenFilter;
-import spring.security.service.UserDetailsServiceImpl;
+import spring.security.config.security.UserDetailsServiceImpl;
 
 
 /**

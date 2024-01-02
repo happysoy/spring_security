@@ -1,4 +1,4 @@
-package spring.security.dto.response;
+package spring.security.exception.response;
 
 public record MessageResponse(String message) {
 }
