@@ -1,9 +1,7 @@
 package spring.security.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
@@ -14,8 +12,10 @@ import java.util.Set;
 @Table(name = "\"user\"",
         uniqueConstraints = @UniqueConstraint(columnNames = "email"))
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @DynamicInsert //column default value 넣기
+@Builder
 public class User extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,10 +39,17 @@ public class User extends BaseTimeEntity {
     // TODO refreshToken Redis 로 관리
     private String refreshToken;
 
-    public User(String username, String email, String password, ERole role) {
+    public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
+    }
+
+    public void setUserRole(ERole role) {
         this.role = role;
     }
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 }

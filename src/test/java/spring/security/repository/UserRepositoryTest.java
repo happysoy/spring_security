@@ -21,7 +21,7 @@ class UserRepositoryTest {
     @Test
     void findByUserName() throws Exception{
         //given
-        User user = new User("신짱구", "a@gmail.com", "a", ERole.ROLE_USER);
+        User user = new User("신짱구", "a@gmail.com", "a");
         userRepository.save(user);
 
         //when

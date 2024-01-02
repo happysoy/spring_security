@@ -26,7 +26,7 @@ class BaseTimeEntityTest {
     void BaseTimeEntity_등록() throws Exception{
         //given
         LocalDateTime now = LocalDateTime.of(2024, 1, 2, 0, 0, 0);
-        User user = new User("신짱구", "a@gmail.com", "a", ERole.ROLE_USER);
+        User user = new User("신짱구", "a@gmail.com", "a");
 
         //when
         userRepository.save(user);

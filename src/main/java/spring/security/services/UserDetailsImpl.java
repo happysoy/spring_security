@@ -15,11 +15,10 @@ import java.util.List;
 
 @Getter
 public class UserDetailsImpl implements UserDetails {
-
 //    @Serial
 //    private static final long serialVersionUID = 1L;
 
-    private Long id;
+    private Long userId;
 
     private String username;
 
@@ -30,8 +29,8 @@ public class UserDetailsImpl implements UserDetails {
 
     private String authority;
 
-    public UserDetailsImpl(Long id, String username, String email, String password, String authority) {
-        this.id = id;
+    public UserDetailsImpl(Long userId, String username, String email, String password, String authority) {
+        this.userId = userId;
         this.username = username;
         this.email = email;
         this.password = password;

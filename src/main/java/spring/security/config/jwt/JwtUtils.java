@@ -9,7 +9,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import spring.security.services.UserDetailsImpl;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 /**
@@ -19,14 +21,19 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    @Value("app.jwt-secret")
-    private String jwtSecret;
 
-    private static final long jwtExpiration = 24 * 60 * 60 * 1000; // 1일
+    @Value("${jwt.secret}")
+    String secretKeyPlain;
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
+
+    public JwtUtils(@Value("${jwt.secret}") String secretKeyPlain,
+                    @Value("${jwt.expiration}") long jwtExpiration) {
+        this.secretKeyPlain = secretKeyPlain;
+        this.jwtExpiration = jwtExpiration;
+    }
 
 
-//    @Value("app.jwt-expiration")
-//    private int jwtExpiration;
 
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -40,8 +47,15 @@ public class JwtUtils {
     }
 
     public Key key() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+        return Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKeyPlain));
     }
+    /**
+     plain -> 시크릿 키 객체 변환
+     */
+//    private SecretKey key() {
+//        String keyBase64Encoded = Base64.getEncoder().encodeToString(secretKeyPlain.getBytes());
+//        return Keys.hmacShaKeyFor(keyBase64Encoded.getBytes());
+//    }
 
     public String getEmailFromToken(String token) {
         return Jwts.parserBuilder()
