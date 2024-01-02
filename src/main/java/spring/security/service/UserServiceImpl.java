@@ -59,7 +59,6 @@ public class UserServiceImpl implements UserService{
     public ResponseEntity<?> signIn(SignInRequest request) {
         // TODO 로그인 실패 예외처리
 
-        // 인증 성공 시 사용자 정보(UserDetails) 로드
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
@@ -69,10 +68,7 @@ public class UserServiceImpl implements UserService{
 
         ResponseCookie jwtAccessCookie = jwtUtils.generateAccessJwtCookie(userDetails);
 
-        String refreshToken = jwtUtils.generateRefreshToken();
-        // TODO RedisServiceSet
-        long expiredTime = 30 * 1000; // 30초
-        redisService.setRedisTemplate(refreshToken, userDetails.getEmail(), Duration.ofMillis(expiredTime));
+        String refreshToken = jwtUtils.generateRefreshToken(userDetails.getEmail());
         ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken);
 
 
@@ -83,7 +79,6 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    @Transactional
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
         String refreshToken = jwtUtils.getRefreshJwtFromCookies(request);
 

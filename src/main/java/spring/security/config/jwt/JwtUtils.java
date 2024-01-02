@@ -12,11 +12,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
 import spring.security.config.security.UserDetailsImpl;
 import spring.security.repository.UserRepository;
+import spring.security.service.RedisService;
 
 import java.security.Key;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
@@ -44,7 +47,7 @@ public class JwtUtils {
     @Value("${jwt.refresh-cookie-name}")
     private String jwtRefreshCookie;
 
-    private final UserRepository userRepository;
+    private final RedisService redisService;
 
 
     /**
@@ -52,12 +55,12 @@ public class JwtUtils {
      */
     public JwtUtils(@Value("${jwt.secret}") String secretKey,
                     @Value("${jwt.access-expiration}") long jwtAccessExpiration,
-//                    @Value("${jwt.refresh-expiration}") long jwtRefreshExpiration,
-                    UserRepository userRepository) {
+                    @Value("${jwt.refresh-expiration}") long jwtRefreshExpiration,
+                    RedisService redisService) {
         this.secretKey = secretKey;
         this.jwtAccessExpiration = jwtAccessExpiration;
-//        this.jwtRefreshExpiration = jwtRefreshExpiration;
-        this.userRepository = userRepository;
+        this.jwtRefreshExpiration = jwtRefreshExpiration;
+        this.redisService = redisService;
     }
     public Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
@@ -109,8 +112,13 @@ public class JwtUtils {
                 .compact();
     }
 
-    public String generateRefreshToken() {
-        return UUID.randomUUID().toString();
+    @Transactional
+    public String generateRefreshToken(String email) {
+        String refreshToken = UUID.randomUUID().toString();
+
+        long expiredTime = 30 * 1000; // 30초
+        redisService.setRedisTemplate(refreshToken, email, Duration.ofMillis(expiredTime)); // TODO test 용
+        return refreshToken;
     }
 
 
