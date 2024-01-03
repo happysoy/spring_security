@@ -1,20 +1,16 @@
 package spring.security.service;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Date;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class UserServiceImplTest {
+class RedisServiceTest {
 
     @Autowired
     private RedisService redisService;
@@ -34,5 +30,16 @@ class UserServiceImplTest {
         //then
         assertThat(value).isEqualTo(returnValue);
         assertThat(value).isEqualTo("email");
+
+    }
+    @Test
+    void deleteRedis() {
+        String key = "token";
+        //when
+        redisService.deleteRedisTemplateValue(key);
+        //then
+        String returnValue = redisService.getRedisTemplateValue(key);
+        assertThat(returnValue).isNull();
+
     }
 }

@@ -27,12 +27,13 @@ import spring.security.exception.response.MessageResponse;
 import spring.security.repository.UserRepository;
 
 import java.time.Duration;
+import java.util.Objects;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
@@ -42,6 +43,12 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional
     public SignUpRequest singUp(SignUpRequest request) {
+        // 비밀번호 != 비밀번호 확인
+        if (!Objects.equals(request.password(), request.passwordCheck())) {
+            throw new CustomException(ExceptionStatus.FAIL_PASSWORD_CHECK);
+        }
+
+        // 이메일 중복 확인
         if (userRepository.existsByEmail(request.email())) {
             throw new CustomException(ExceptionStatus.DUPLICATE_EMAIL);
         }
@@ -57,7 +64,14 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional
     public ResponseEntity<?> signIn(SignInRequest request) {
-        // TODO 로그인 실패 예외처리
+        // 이메일 존재 확인
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new CustomException(ExceptionStatus.FAIL_LOGIN));
+
+        // 유효한 이메일, 비밀번호인지 확인
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new CustomException(ExceptionStatus.FAIL_LOGIN);
+        }
 
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
@@ -85,15 +99,34 @@ public class UserServiceImpl implements UserService{
         if ((refreshToken != null) && (!refreshToken.isEmpty())) {
             String email = redisService.getRedisTemplateValue(refreshToken);
             return userRepository.findByEmail(email)
-                    .map(user->{
+                    .map(user -> {
                         ResponseCookie jwtAccessCookie = jwtUtils.generateAccessJwtCookie(UserDetailsImpl.build(user));
                         return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
                                 .body(new MessageResponse("access token 재발급 성공"));
                     })
-                    .orElseThrow(()-> new CustomException(ExceptionStatus.DB_EMPTY_REFRESH_TOKEN));
+                    .orElseThrow(() -> new CustomException(ExceptionStatus.EXPIRED_TOKEN));
         }
         return ResponseEntity.badRequest().body(new MessageResponse("refresh token이 http cookie에 없습니다"));
+    }
+
+    @Override
+    public ResponseEntity<?> signOut(HttpServletRequest request) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        String refreshToken = jwtUtils.getRefreshJwtFromCookies(request);
+        if (!principal.toString().equals("anonymousUser")) {
+            redisService.deleteRedisTemplateValue(refreshToken);
+        }
+
+        ResponseCookie cleanJwtAccessCookie = jwtUtils.getCleanAccessJwtCookie();
+        ResponseCookie cleanJwtRefreshCookie = jwtUtils.getCleanRefreshJwtCookie();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cleanJwtAccessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, cleanJwtRefreshCookie.toString())
+                .body(new MessageResponse("로그아웃 성공"));
+
     }
 
     @Override

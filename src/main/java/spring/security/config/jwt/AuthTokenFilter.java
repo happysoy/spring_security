@@ -43,7 +43,6 @@ public class AuthTokenFilter extends OncePerRequestFilter { // OncePerRequestFil
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // UserDetails 객체는 SpringContext 인에서 사용 가능
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 

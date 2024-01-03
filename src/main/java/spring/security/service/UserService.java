@@ -11,6 +11,8 @@ public interface UserService {
 
     ResponseEntity<?> signIn(SignInRequest signInRequest);
 
+    ResponseEntity<?> signOut(HttpServletRequest request);
+
     ResponseEntity<?> refreshToken(HttpServletRequest request);
     String hashPassword(String password);
 }

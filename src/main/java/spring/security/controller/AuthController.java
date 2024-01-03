@@ -59,6 +59,11 @@ public class AuthController {
         return userService.signIn(request);
     }
 
+    @PostMapping("/signout")
+    public ResponseEntity<?> signOutUser(HttpServletRequest request) {
+        return userService.signOut(request);
+    }
+
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
 

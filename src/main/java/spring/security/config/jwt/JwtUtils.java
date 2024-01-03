@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
 import spring.security.config.security.UserDetailsImpl;
+import spring.security.exception.CustomException;
+import spring.security.exception.ExceptionStatus;
 import spring.security.repository.UserRepository;
 import spring.security.service.RedisService;
 
@@ -35,10 +37,10 @@ public class JwtUtils {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.access-expiration}")
+    @Value("${jwt.access-expiration}") //1분
     private long jwtAccessExpiration;
 
-    @Value("${jwt.refresh-expiration}")
+    @Value("${jwt.refresh-expiration}") //2분
     private long jwtRefreshExpiration;
 
     @Value("${jwt.access-cookie-name}")
@@ -79,9 +81,9 @@ public class JwtUtils {
         return generateCookie(jwtRefreshCookie, refreshToken, "/api");
     }
 
-//    public String getAccessJwtFromCookies(HttpServletRequest request) {
-//        return getCookieValueByName(request, jwtAccessCookie);
-//    }
+    public String getAccessJwtFromCookies(HttpServletRequest request) {
+        return getCookieValueByName(request, jwtAccessCookie);
+    }
 
     public String getRefreshJwtFromCookies(HttpServletRequest request) {
         return getCookieValueByName(request, jwtRefreshCookie);
@@ -100,6 +102,15 @@ public class JwtUtils {
         }
     }
 
+    public ResponseCookie getCleanAccessJwtCookie() {
+        ResponseCookie cookie = ResponseCookie.from(jwtAccessCookie, null).path("/api").build();
+        return cookie;
+    }
+    public ResponseCookie getCleanRefreshJwtCookie() {
+        ResponseCookie cookie = ResponseCookie.from(jwtRefreshCookie, null).path("/api").build();
+        return cookie;
+    }
+
     /**
      * Token 관리
      */
@@ -116,8 +127,8 @@ public class JwtUtils {
     public String generateRefreshToken(String email) {
         String refreshToken = UUID.randomUUID().toString();
 
-        long expiredTime = 30 * 1000; // 30초
-        redisService.setRedisTemplate(refreshToken, email, Duration.ofMillis(expiredTime)); // TODO test 용
+//        long expiredTime = 30 * 1000; // 30초
+        redisService.setRedisTemplate(refreshToken, email, Duration.ofMillis(jwtRefreshExpiration)); // TODO test 용
         return refreshToken;
     }
 
@@ -139,7 +150,6 @@ public class JwtUtils {
                     .parse(token);
             return true;
         } catch (MalformedJwtException e) {
-            //TODO log 말고 throw 로 전환
             log.error("Invalid JWT token={}", e.getMessage());
         } catch (ExpiredJwtException e) {
             log.error("Jwt token is expired={}", e.getMessage());

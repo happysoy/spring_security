@@ -14,15 +14,18 @@ public class ExceptionStatusProvider {
         throw new CustomException(ExceptionStatusProvider.getExceptionStatus(code, field));
     }
 
-    public static ExceptionStatus getExceptionStatus(String code, String target) {
+    public static ExceptionStatus getExceptionStatus(String code, String field) {
         switch (code) {
             case "NotBlank" -> {
-                switch (target) {
+                switch (field) {
                     case "email" -> {
                         return ExceptionStatus.USER_EMPTY_EMAIL;
                     }
                     case "password" -> {
                         return ExceptionStatus.USER_EMPTY_PASSWORD;
+                    }
+                    case "passwordCheck" -> {
+                        return ExceptionStatus.USER_EMPTY_PASSWORD_CHECK;
                     }
                     case "username" -> {
                         return ExceptionStatus.USER_EMPTY_USERNAME;
@@ -30,28 +33,18 @@ public class ExceptionStatusProvider {
                 }
             }
             case "Pattern", "Length" -> {
-                switch (target) {
-                    case "email" -> {
-                        return ExceptionStatus.USER_INVALID_EMAIL;
+                switch (field) {
+                    case "username" -> {
+                        return ExceptionStatus.USER_INVALID_NAME;
                     }
                     case "password" -> {
                         return ExceptionStatus.USER_INVALID_PASSWORD;
                     }
                 }
             }
-//            case "NotNull" -> {
-//                switch (target){
-//                    case "accessToken" ->{
-//                        return ExceptionStatus.EMPTY_ACCESS_TOKEN;
-//                    }
-//                    case "refreshToken"->{
-//                        return ExceptionStatus.EMPTY_REFRESH_TOKEN;
-//                    }
-//                }
-//            }
-//            case "JwtMalformed" -> {
-//                return ExceptionStatus.INVALID_TOKEN;
-//            }
+            case "Email" ->{
+                return ExceptionStatus.USER_INVALID_EMAIL;
+            }
         }
         return ExceptionStatus.RESPONSE_ERROR;
     }

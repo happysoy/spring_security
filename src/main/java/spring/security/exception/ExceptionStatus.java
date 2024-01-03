@@ -20,19 +20,21 @@ public enum ExceptionStatus {
     USER_EMPTY_EMAIL(false, 2101, "이메일을 입력해주세요"),
     USER_EMPTY_USERNAME(false, 2102, "이름을 입력해주세요"),
     USER_EMPTY_PASSWORD(false, 2103, "비밀번호를 입력해주세요"),
+    USER_EMPTY_PASSWORD_CHECK(false, 2103, "비밀번호 확인을 입력해주세요"),
+
 
     USER_INVALID_EMAIL(false, 2104, "이메일 형식이 올바르지 않습니다"),
     USER_INVALID_PASSWORD(false, 2105, "비밀번호 형식이 올바르지 않습니다"),
+    USER_INVALID_NAME(false, 2105, "이름 형식이 올바르지 않습니다"),
 
     // role 관리
     USER_ACCESS_DENIED(false, 2100, "접근 권한이 없습니다"),
 
     // token 관리
-    INVALID_TOKEN(false, 2200, "유효하지 않은 토큰입니다"),
-    EMPTY_ACCESS_TOKEN(false, 2203, "Access Token이 없습니다"),
-    EMPTY_REFRESH_TOKEN(false, 2203, "Refresh Token이 없습니다"),
-    EXPIRED_REFRESH_TOKEN(false, 2204, "Refresh Token이 만료되었습니다."),
-    DB_EMPTY_REFRESH_TOKEN(false, 2205, "Refresh Token을 재발급 받아야 합니다"),
+//    INVALID_TOKEN(false, 2200, "변조된 토큰입니다"),
+    EMPTY_ACCESS_TOKEN(false, 2201, "Access Token이 없습니다"),
+    EMPTY_REFRESH_TOKEN(false, 2202, "Refresh Token이 없습니다"),
+    EXPIRED_TOKEN(false, 2203, "토큰이 만료되었습니다"),
 
     /**
      * 2200: response 에러
