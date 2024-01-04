@@ -34,19 +34,21 @@ public class User extends BaseTimeEntity {
     @ColumnDefault("'ACTIVE'")
     private String status;
 
+    private String profileImg;
+
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
     }
 
-    public void setUserRole(ERole role) {
+    public void changeUserRole(ERole role) {
         this.role = role;
     }
 
-    // TODO @Setter 로 전환?
-    public void setPassword(String password) {
-        this.password = password;
+    public void changeProfileImg(String profileImg) {
+        this.profileImg = profileImg;
     }
+
 
 }

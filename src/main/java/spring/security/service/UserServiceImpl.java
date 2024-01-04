@@ -40,6 +40,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final RedisService redisService;
 
+
+
     @Override
     @Transactional
     public SignUpRequest singUp(SignUpRequest request) {
@@ -54,7 +56,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User entity = request.toEntity(hashPassword(request.password()));
-        entity.setUserRole(ERole.ROLE_USER);
+        entity.changeUserRole(ERole.ROLE_USER);
 
         userRepository.save(entity);
 
@@ -73,23 +75,22 @@ public class UserServiceImpl implements UserService {
             throw new CustomException(ExceptionStatus.FAIL_LOGIN);
         }
 
-        Authentication authenticate = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
-        );
-        SecurityContextHolder.getContext().setAuthentication(authenticate);
+//        Authentication authenticate = authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(request.email(), request.password())
+//        );
+//        SecurityContextHolder.getContext().setAuthentication(authenticate);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authenticate.getPrincipal();
 
-        ResponseCookie jwtAccessCookie = jwtUtils.generateAccessJwtCookie(userDetails);
+        ResponseCookie jwtAccessCookie = jwtUtils.generateAccessJwtCookie(user);
 
-        String refreshToken = jwtUtils.generateRefreshToken(userDetails.getEmail());
+        String refreshToken = jwtUtils.generateRefreshToken(user.getEmail());
         ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshJwtCookie(refreshToken);
 
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
-                .body(new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), userDetails.getEmail()));
+                .body(new UserInfoResponse(user.getId(), user.getUsername(), user.getEmail()));
     }
 
     @Override
@@ -100,7 +101,7 @@ public class UserServiceImpl implements UserService {
             String email = redisService.getRedisTemplateValue(refreshToken);
             return userRepository.findByEmail(email)
                     .map(user -> {
-                        ResponseCookie jwtAccessCookie = jwtUtils.generateAccessJwtCookie(UserDetailsImpl.build(user));
+                        ResponseCookie jwtAccessCookie = jwtUtils.generateAccessJwtCookie(new UserDetailsImpl(user).getUser());
                         return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
                                 .body(new MessageResponse("access token 재발급 성공"));
@@ -132,5 +133,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public String hashPassword(String password) {
         return passwordEncoder.encode(password);
+    }
+
+
+    @Override
+    @Transactional
+    public void deleteProfile(User user) {
+        user.changeProfileImg(null);
+        userRepository.save(user);
+    }
+
+    // /profile-img?image=abc
+    @Override
+    @Transactional
+    public void uploadProfile(User user, String upload) {
+        user.changeProfileImg(upload);
+        userRepository.save(user);
     }
 }

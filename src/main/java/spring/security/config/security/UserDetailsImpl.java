@@ -10,39 +10,19 @@ import spring.security.domain.User;
 import java.util.Collection;
 import java.util.List;
 
-@Getter
+//@Getter
 public class UserDetailsImpl implements UserDetails {
 //    @Serial
 //    private static final long serialVersionUID = 1L;
 
-    private final Long id;
+    private static User user;
 
-    private final String username;
-
-    private final String email;
-
-    @JsonIgnore // Response 데이터에서 해당 필드 제외
-    private String password; // TODO final 필드?
-
-    private final String authority;
-
-    public UserDetailsImpl(Long id, String username, String email, String password, String authority) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.authority= authority;
+    public User getUser() {
+        return user;
     }
 
-    // TODO @builder 전환
-    public static UserDetailsImpl build(User user) {
-        return new UserDetailsImpl(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getPassword(),
-                user.getRole().name()
-        );
+    public UserDetailsImpl(User user) {
+        UserDetailsImpl.user = user;
     }
 
     /**
@@ -50,9 +30,22 @@ public class UserDetailsImpl implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(authority)); // 하나의 권한만을 반환
+        return List.of(new SimpleGrantedAuthority(user.getRole().toString())); // 하나의 권한만을 반환
     }
 
+    @Override
+    public String getPassword() {
+        return this.getUser().getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.getUser().getUsername();
+    }
+
+    public String getEmail() {
+        return this.getUser().getEmail();
+    }
     /**
      * 계정 만료 여부
      * true : 만료 안됨

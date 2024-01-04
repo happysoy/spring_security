@@ -18,6 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import spring.security.config.jwt.AuthEntryPoint;
 import spring.security.config.jwt.AuthTokenFilter;
+import spring.security.config.jwt.JwtDeniedHandler;
 import spring.security.config.security.UserDetailsServiceImpl;
 
 
@@ -31,7 +32,8 @@ import spring.security.config.security.UserDetailsServiceImpl;
 public class WebSecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
-    private final AuthEntryPoint authEntryPointHandler; // 권한 인증 에러 핸들링
+    private final AuthEntryPoint authEntryPointHandler; // 유저 정보 없이 접근하는 경우 에러 핸들링
+    private final JwtDeniedHandler jwtDeniedHandler; // 자원에 접근할 수 있는 권한이 없는 경우 에러 핸들링
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -60,6 +62,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointHandler))
+                .exceptionHandling(exception -> exception.accessDeniedHandler(jwtDeniedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT 사용 -> 세션정책 비활성화
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll()
@@ -86,5 +89,11 @@ public class WebSecurityConfig {
         return web -> web.ignoring()
                 .requestMatchers(PathRequest.toH2Console());
     }
+
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        return (web) -> web.ignoring()
+//                .antMatchers("/h2-console/**", "/favicon.ico");
+//    }
 
 }

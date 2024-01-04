@@ -44,7 +44,7 @@ public class TestDataInit {
         private void extracted(String username, String email, String password) {
             String hashPassword = passwordEncoder.encode(password);
             User user = new User(username, email, hashPassword);
-            user.setUserRole(ERole.ROLE_USER);
+            user.changeUserRole(ERole.ROLE_USER);
             userRepository.save(user);
 
         }

@@ -6,11 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import spring.security.config.jwt.JwtUtils;
+import spring.security.config.security.UserDetailsImpl;
+import spring.security.domain.User;
 import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
 import spring.security.exception.response.CodeMessageResponse;
@@ -68,6 +71,18 @@ public class AuthController {
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
 
         return userService.refreshToken(request);
+    }
+
+    @PostMapping("/profile-img")
+    public CodeMessageResponse uploadProfileImg(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("image") String imageURL) {
+        userService.uploadProfile(userDetails.getUser(), imageURL);
+        return message.getSuccessResponse();
+    }
+
+    @PatchMapping("/delete/profile-img")
+    public CodeMessageResponse deleteProfileImg(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        userService.deleteProfile(userDetails.getUser());
+        return message.getSuccessResponse();
     }
 
 }

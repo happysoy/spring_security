@@ -10,11 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
 import spring.security.config.security.UserDetailsImpl;
+import spring.security.domain.User;
 import spring.security.exception.CustomException;
 import spring.security.exception.ExceptionStatus;
 import spring.security.repository.UserRepository;
@@ -72,8 +73,8 @@ public class JwtUtils {
     /**
      * 클라이언트 http cookie 관리
      */
-    public ResponseCookie generateAccessJwtCookie(UserDetailsImpl userDetails) {
-        String jwt = generateAccessTokenFromEmail(userDetails.getEmail());
+    public ResponseCookie generateAccessJwtCookie(User user) {
+        String jwt = generateAccessTokenFromEmail(user.getEmail());
         return generateCookie(jwtAccessCookie, jwt, "/api");
     }
 
@@ -142,6 +143,7 @@ public class JwtUtils {
                 .getSubject();
     }
 
+
     public boolean validateJwtToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -160,8 +162,4 @@ public class JwtUtils {
         }
         return false;
     }
-
-
-
-
 }
