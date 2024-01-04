@@ -50,5 +50,9 @@ public class User extends BaseTimeEntity {
         this.profileImg = profileImg;
     }
 
+    public void changePassword(String password) {
+        this.password = password;
+    }
+
 
 }

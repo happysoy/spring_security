@@ -2,11 +2,11 @@ package spring.security.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
-import spring.security.config.security.UserDetailsImpl;
 import spring.security.domain.User;
+import spring.security.dto.request.ChangePasswordRequest;
 import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
-import spring.security.dto.response.UserInfoResponse;
+import spring.security.exception.response.DataMessageResponse;
 
 public interface UserService {
     SignUpRequest singUp(SignUpRequest signUpRequest);
@@ -18,8 +18,11 @@ public interface UserService {
     ResponseEntity<?> refreshToken(HttpServletRequest request);
     String hashPassword(String password);
 
+    void changePassword(User user, ChangePasswordRequest request);
+
     void uploadProfile(User user, String upload);
 
     void deleteProfile(User user);
+
 
 }

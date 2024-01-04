@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import spring.security.config.jwt.JwtUtils;
 import spring.security.config.security.UserDetailsImpl;
 import spring.security.domain.User;
+import spring.security.dto.request.ChangePasswordRequest;
 import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
 import spring.security.exception.response.CodeMessageResponse;
@@ -71,6 +72,15 @@ public class AuthController {
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
 
         return userService.refreshToken(request);
+    }
+
+    @PostMapping("/password-change")
+    public CodeMessageResponse changePassword(@AuthenticationPrincipal UserDetailsImpl userDetails, @Validated @RequestBody ChangePasswordRequest request, Errors errors) {
+        if (errors.hasErrors()) {
+            ExceptionStatusProvider.throwError(errors);
+        }
+        userService.changePassword(userDetails.getUser(), request);
+        return message.getSuccessResponse();
     }
 
     @PostMapping("/profile-img")

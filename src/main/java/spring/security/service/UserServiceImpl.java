@@ -7,8 +7,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,16 +15,16 @@ import spring.security.config.jwt.JwtUtils;
 import spring.security.config.security.UserDetailsImpl;
 import spring.security.domain.ERole;
 import spring.security.domain.User;
+import spring.security.dto.request.ChangePasswordRequest;
 import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
 import spring.security.dto.response.UserInfoResponse;
 import spring.security.exception.CustomException;
 import spring.security.exception.ExceptionStatus;
-import spring.security.exception.ExceptionStatusProvider;
+import spring.security.exception.response.DataMessageResponse;
 import spring.security.exception.response.MessageResponse;
 import spring.security.repository.UserRepository;
 
-import java.time.Duration;
 import java.util.Objects;
 
 @Slf4j
@@ -138,6 +136,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void changePassword(User user, ChangePasswordRequest request) {
+        // 비밀번호 != 비밀번호 확인
+        if (!Objects.equals(request.password(), request.passwordCheck())) {
+            throw new CustomException(ExceptionStatus.FAIL_PASSWORD_CHECK);
+        }
+
+        user.changePassword(hashPassword(request.password()));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
     public void deleteProfile(User user) {
         user.changeProfileImg(null);
         userRepository.save(user);
@@ -150,4 +160,6 @@ public class UserServiceImpl implements UserService {
         user.changeProfileImg(upload);
         userRepository.save(user);
     }
+
+
 }
