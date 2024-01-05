@@ -1,4 +1,4 @@
-package spring.security.exception.response;
+package spring.security.common.exception;
 
 public record MessageResponse(String message) {
 }

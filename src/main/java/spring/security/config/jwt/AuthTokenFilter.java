@@ -16,6 +16,9 @@ import spring.security.config.security.UserDetailsServiceImpl;
 
 import java.io.IOException;
 
+import static spring.security.common.AuthStatic.AUTH_HEADER;
+import static spring.security.common.AuthStatic.BEARER;
+
 /**
  * 토큰 인증을 위한 필터
  */
@@ -54,9 +57,9 @@ public class AuthTokenFilter extends OncePerRequestFilter { // OncePerRequestFil
     }
 
     private String parseJwt(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader(AUTH_HEADER);
 
-        if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) { //AccessToken 의 맨 앞 'Bearer ' 삭제
+        if (StringUtils.hasText(authHeader) && authHeader.startsWith(BEARER)) { //AccessToken 의 맨 앞 'Bearer ' 삭제
 //            return authHeader.substring(7);
             return authHeader.split(" ")[1].trim();
 

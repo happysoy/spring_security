@@ -43,11 +43,19 @@ jwt:
 #  access-expiration: 60000 # 1분
 #  refresh-expiration: 120000 # 2분
 springdoc:
-  default-consumes-media-type: application/json
+#  api-docs:
+#    enabled: true
   default-produces-media-type: application/json
-  show-login-endpoint: true
+  default-consumes-media-type: application/json
   swagger-ui:
-    path: /swagger-ui # default is '/swagger-ui/index.html'
-    disable-swagger-default-url: true # default url disable
-    groups-order: DESC # path, query, body, response 순으로 출력
-    display-request-duration: true # swagger-ui에서 try 했을 때 request duration을 알려주는 설정
+    tags-sorter: alpha
+    disable-swagger-default-url: true   #디폴트 페이지 안나오게
+#  default-consumes-media-type: application/json
+#  default-produces-media-type: application/json
+#  show-login-endpoint: true
+#  swagger-ui:
+#    enabled: true
+##    path: /swagger-ui # default is '/swagger-ui/index.html'
+#    disable-swagger-default-url: true # default url disable
+#    groups-order: DESC # path, query, body, response 순으로 출력
+#    display-request-duration: true # swagger-ui에서 try 했을 때 request duration을 알려주는 설정

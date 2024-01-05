@@ -1,4 +1,5 @@
-package spring.security.exception.response;
+package spring.security.common.exception.response;
+
 
 public record CodeMessageResponse(Boolean isSuccess, int code, String message) {
     public static CodeMessageResponse of(Boolean isSuccess, int code, String message) {

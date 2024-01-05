@@ -11,6 +11,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import spring.security.common.exception.MessageResponse;
+import spring.security.common.exception.request.ClientInvalidPassword;
+import spring.security.common.exception.request.ExpiredToken;
+import spring.security.common.exception.response.DataMessageResponse;
+import spring.security.common.exception.response.DuplicateEmail;
+import spring.security.common.exception.response.FailLogin;
+import spring.security.common.exception.response.UserNotFound;
 import spring.security.config.jwt.JwtUtils;
 import spring.security.config.security.UserDetailsImpl;
 import spring.security.domain.ERole;
@@ -19,10 +26,6 @@ import spring.security.dto.request.ChangePasswordRequest;
 import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
 import spring.security.dto.response.UserInfoResponse;
-import spring.security.exception.CustomException;
-import spring.security.exception.ExceptionStatus;
-import spring.security.exception.response.DataMessageResponse;
-import spring.security.exception.response.MessageResponse;
 import spring.security.repository.UserRepository;
 
 import java.util.Objects;
@@ -42,15 +45,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public SignUpRequest singUp(SignUpRequest request) {
+    public ResponseEntity<UserInfoResponse> signUp(SignUpRequest request) {
         // 비밀번호 != 비밀번호 확인
         if (!Objects.equals(request.password(), request.passwordCheck())) {
-            throw new CustomException(ExceptionStatus.FAIL_PASSWORD_CHECK);
+            throw ClientInvalidPassword.EXCEPTION;
         }
 
         // 이메일 중복 확인
         if (userRepository.existsByEmail(request.email())) {
-            throw new CustomException(ExceptionStatus.DUPLICATE_EMAIL);
+            throw DuplicateEmail.EXCEPTION;
         }
 
         User entity = request.toEntity(hashPassword(request.password()));
@@ -58,7 +61,11 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(entity);
 
-        return request;
+        return ResponseEntity.ok()
+                .body(UserInfoResponse.builder().
+                        username(entity.getUsername()).
+                        email(entity.getEmail()).
+                        build());
     }
 
     @Override
@@ -66,11 +73,11 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> signIn(SignInRequest request) {
         // 이메일 존재 확인
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new CustomException(ExceptionStatus.FAIL_LOGIN));
+                .orElseThrow(() -> UserNotFound.EXCEPTION);
 
         // 유효한 이메일, 비밀번호인지 확인
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new CustomException(ExceptionStatus.FAIL_LOGIN);
+            throw FailLogin.EXCEPTION;
         }
 
 //        Authentication authenticate = authenticationManager.authenticate(
@@ -88,7 +95,7 @@ public class UserServiceImpl implements UserService {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
-                .body(new UserInfoResponse(user.getId(), user.getUsername(), user.getEmail()));
+                .body(new UserInfoResponse(user.getUsername(), user.getEmail()));
     }
 
     @Override
@@ -104,7 +111,7 @@ public class UserServiceImpl implements UserService {
                                 .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
                                 .body(new MessageResponse("access token 재발급 성공"));
                     })
-                    .orElseThrow(() -> new CustomException(ExceptionStatus.EXPIRED_TOKEN));
+                    .orElseThrow(() -> ExpiredToken.EXCEPTION);
         }
         return ResponseEntity.badRequest().body(new MessageResponse("refresh token이 http cookie에 없습니다"));
     }
@@ -139,7 +146,7 @@ public class UserServiceImpl implements UserService {
     public void changePassword(User user, ChangePasswordRequest request) {
         // 비밀번호 != 비밀번호 확인
         if (!Objects.equals(request.password(), request.passwordCheck())) {
-            throw new CustomException(ExceptionStatus.FAIL_PASSWORD_CHECK);
+            throw ClientInvalidPassword.EXCEPTION;
         }
 
         user.changePassword(hashPassword(request.password()));

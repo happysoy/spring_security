@@ -22,6 +22,7 @@ import spring.security.config.jwt.JwtDeniedHandler;
 import spring.security.config.security.UserDetailsServiceImpl;
 
 
+
 /**
  * HttpSecurity, cors, csrf, 리소스 접근 제한 규칙 등을 설정
  */
@@ -36,7 +37,7 @@ public class WebSecurityConfig {
     private final JwtDeniedHandler jwtDeniedHandler; // 자원에 접근할 수 있는 권한이 없는 경우 에러 핸들링
 
     private static final String[] AUTH_WHITELIST={
-            "/v3/**", "/swagger-ui/**"
+            "/swagger-resources/**", "/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs", "/api-docs/**",
     };
 
     @Bean

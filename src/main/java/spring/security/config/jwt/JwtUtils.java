@@ -5,25 +5,17 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
-import spring.security.config.security.UserDetailsImpl;
 import spring.security.domain.User;
-import spring.security.exception.CustomException;
-import spring.security.exception.ExceptionStatus;
-import spring.security.repository.UserRepository;
 import spring.security.service.RedisService;
 
 import java.security.Key;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 

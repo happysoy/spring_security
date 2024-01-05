@@ -2,14 +2,16 @@ package spring.security.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import spring.security.common.exception.response.DataMessageResponse;
 import spring.security.domain.User;
 import spring.security.dto.request.ChangePasswordRequest;
 import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
-import spring.security.exception.response.DataMessageResponse;
+import spring.security.dto.response.UserAndTokenResponse;
+import spring.security.dto.response.UserInfoResponse;
 
 public interface UserService {
-    SignUpRequest singUp(SignUpRequest signUpRequest);
+    ResponseEntity<UserInfoResponse> signUp(SignUpRequest signUpRequest);
 
     ResponseEntity<?> signIn(SignInRequest signInRequest);
 
