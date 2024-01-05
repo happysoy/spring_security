@@ -66,11 +66,11 @@ public class SwaggerConfig {
             ApiErrorCode apiErrorCodeExample =
                     handlerMethod.getMethodAnnotation(ApiErrorCode.class);
 
-//             ApiErrorExceptionsExample 어노테이션 단 메소드 적용
+//             ApiErrorExceptions 어노테이션 단 메소드 적용
             if (apiErrorExceptionsExample != null) {
                 generateExceptionResponse(operation, apiErrorExceptionsExample.value());
             }
-            // ApiErrorCodeExample 어노테이션 단 메소드 적용
+            // ApiErrorCode 어노테이션 단 메소드 적용
             if (apiErrorCodeExample != null) {
                 generateErrorCodeResponse(operation, apiErrorCodeExample.value());
             }

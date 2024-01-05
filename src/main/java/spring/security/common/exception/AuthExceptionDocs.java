@@ -49,6 +49,4 @@ public class AuthExceptionDocs implements SwaggerException {
     @ExplainError("비밀번호와 비밀번호 확인이 일치하지 않는 경우")
     public GlobalCustomException 비밀번호_확인_불일치 = IncorrectPasswordCheck.EXCEPTION;
 
-
-
 }

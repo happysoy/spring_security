@@ -32,7 +32,7 @@ public enum AuthErrorCode implements BaseErrorCode{
     /**
      * 2200: response 에러
      */
-    DUPLICATE_EMAIL(BAD_REQUEST, "AUTH_2200_1", "중복된 이메일입니다"),
+    DUPLICATE_EMAIL(BAD_REQUEST, "AUTH_2200_1", "이미 사용중인 이메일입니다"),
     INCORRECT_PASSWORD_CHECK(BAD_REQUEST, "AUTH_2200_2", "비밀번호와 비밀번호 확인이 일치하지 않습니다"),
     FAIL_LOGIN(BAD_REQUEST, "AUTH_2200_3", "아이디 또는 비밀번호를 확인해주세요"),
     USER_NOT_FOUND(BAD_REQUEST, "AUTH_2200_4", "존재하지 않는 사용자입니다");

@@ -57,7 +57,6 @@ public class AuthController {
 //        if (errors.hasErrors()) {
 //            ExceptionStatusProvider.throwError(errors);
 //        }
-//        return message.getDataResponse(userService.signUp(request));
         return userService.signUp(request);
     }
 

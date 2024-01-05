@@ -11,13 +11,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import spring.security.common.exception.GlobalCustomException;
 import spring.security.common.exception.MessageResponse;
 import spring.security.common.exception.request.ClientInvalidPassword;
 import spring.security.common.exception.request.ExpiredToken;
-import spring.security.common.exception.response.DataMessageResponse;
-import spring.security.common.exception.response.DuplicateEmail;
-import spring.security.common.exception.response.FailLogin;
-import spring.security.common.exception.response.UserNotFound;
+import spring.security.common.exception.response.*;
 import spring.security.config.jwt.JwtUtils;
 import spring.security.config.security.UserDetailsImpl;
 import spring.security.domain.ERole;
@@ -48,7 +46,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<UserInfoResponse> signUp(SignUpRequest request) {
         // 비밀번호 != 비밀번호 확인
         if (!Objects.equals(request.password(), request.passwordCheck())) {
-            throw ClientInvalidPassword.EXCEPTION;
+            throw IncorrectPasswordCheck.EXCEPTION;
         }
 
         // 이메일 중복 확인
@@ -146,7 +144,7 @@ public class UserServiceImpl implements UserService {
     public void changePassword(User user, ChangePasswordRequest request) {
         // 비밀번호 != 비밀번호 확인
         if (!Objects.equals(request.password(), request.passwordCheck())) {
-            throw ClientInvalidPassword.EXCEPTION;
+            throw IncorrectPasswordCheck.EXCEPTION;
         }
 
         user.changePassword(hashPassword(request.password()));
