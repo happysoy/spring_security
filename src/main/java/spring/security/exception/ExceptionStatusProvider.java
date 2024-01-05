@@ -32,7 +32,7 @@ public class ExceptionStatusProvider {
                     }
                 }
             }
-            case "Pattern", "Length" -> {
+            case "Length" -> { // "Pattern
                 switch (field) {
                     case "username" -> {
                         return ExceptionStatus.USER_INVALID_NAME;

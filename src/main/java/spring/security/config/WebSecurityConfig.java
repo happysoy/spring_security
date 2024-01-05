@@ -35,6 +35,10 @@ public class WebSecurityConfig {
     private final AuthEntryPoint authEntryPointHandler; // 유저 정보 없이 접근하는 경우 에러 핸들링
     private final JwtDeniedHandler jwtDeniedHandler; // 자원에 접근할 수 있는 권한이 없는 경우 에러 핸들링
 
+    private static final String[] AUTH_WHITELIST={
+            "/v3/**", "/swagger-ui/**"
+    };
+
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
@@ -68,6 +72,7 @@ public class WebSecurityConfig {
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/test/**").permitAll()
                                 .requestMatchers("/favicon.ico").permitAll()
+                                .requestMatchers(AUTH_WHITELIST).permitAll()
                                 .anyRequest().authenticated()
                 );
 

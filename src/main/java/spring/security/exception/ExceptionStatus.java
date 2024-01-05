@@ -24,7 +24,7 @@ public enum ExceptionStatus {
 
 
     USER_INVALID_EMAIL(false, 2104, "이메일 형식이 올바르지 않습니다"),
-    USER_INVALID_PASSWORD(false, 2105, "비밀번호 형식이 올바르지 않습니다"),
+    USER_INVALID_PASSWORD(false, 2105, "비밀번호는 8글자 이상 20글자 이하여야 합니다"),
     USER_INVALID_NAME(false, 2105, "이름 형식이 올바르지 않습니다"),
 
     // role 관리
