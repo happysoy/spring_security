@@ -1,5 +1,9 @@
 package spring.security.common.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +29,6 @@ public class ErrorResponseAdvice extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.valueOf(errorReason.status()))
                 .body(errorResponse);
     }
-
 
 
 

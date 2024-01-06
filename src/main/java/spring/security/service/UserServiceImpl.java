@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import spring.security.common.exception.SuccessMessageResponse;
 import spring.security.common.exception.request.EmptyToken;
 import spring.security.common.exception.request.ExpiredToken;
 import spring.security.common.exception.response.*;
@@ -112,7 +113,11 @@ public class UserServiceImpl implements UserService {
                         ResponseCookie jwtAccessCookie = jwtUtils.generateAccessJwtCookie(new UserDetailsImpl(user).getUser());
                         return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
-                                .body(new UserAndTokenResponse(jwtAccessCookie.toString(), refreshToken, user.getUsername()));
+                                .body(UserAndTokenResponse.builder()
+                                        .accessToken(jwtAccessCookie.toString())
+                                        .refreshToken(refreshToken)
+                                        .username(user.getUsername())
+                                        .build());
                     })
                     .orElseThrow(() -> ExpiredToken.EXCEPTION);
         }
@@ -135,7 +140,7 @@ public class UserServiceImpl implements UserService {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cleanJwtAccessCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, cleanJwtRefreshCookie.toString())
-                .body(null);
+                .body(new SuccessMessageResponse("로그아웃 성공"));
 
     }
 
@@ -147,7 +152,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ResponseEntity<UserInfoResponse> changePassword(User user, ChangePasswordRequest request) {
+    public ResponseEntity<?> changePassword(User user, ChangePasswordRequest request) {
         // 비밀번호 != 비밀번호 확인
         if (!Objects.equals(request.password(), request.passwordCheck())) {
             throw IncorrectPasswordCheck.EXCEPTION;
@@ -156,29 +161,30 @@ public class UserServiceImpl implements UserService {
         user.changePassword(hashPassword(request.password()));
         userRepository.save(user);
 
-//        return ResponseEntity.ok()
-//                .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
-//                .body(new UserAndTokenResponse(jwtAccessCookie.toString(), refreshToken, user.getUsername()));
-//    })
-
-        return ResponseEntity.ok() // TODO userinforesponse안에 builder 넣기
-                .body(new UserInfoResponse(user.getUsername(), user.getEmail()));
+        return ResponseEntity.ok()
+                .body(new SuccessMessageResponse("비밀번호 변경 성공"));
     }
 
-    @Override
-    @Transactional
-    public void deleteProfile(User user) {
-        user.changeProfileImg(null);
-        userRepository.save(user);
-    }
 
     // /profile-img?image=abc
     @Override
     @Transactional
-    public void uploadProfile(User user, String upload) {
+    public ResponseEntity<?> uploadProfile(User user, String upload) {
         user.changeProfileImg(upload);
         userRepository.save(user);
+        return ResponseEntity.ok()
+                .body(new SuccessMessageResponse("프로필 이미지 업로드 성공"));
     }
+
+    @Override
+    @Transactional
+    public ResponseEntity<?> deleteProfile(User user) {
+        user.changeProfileImg(null);
+        userRepository.save(user);
+        return ResponseEntity.ok()
+                .body(new SuccessMessageResponse("프로필 이미지 삭제 성공"));
+    }
+
 
 
 }

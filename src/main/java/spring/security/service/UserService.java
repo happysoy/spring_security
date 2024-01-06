@@ -19,11 +19,11 @@ public interface UserService {
     ResponseEntity<UserAndTokenResponse> refreshToken(HttpServletRequest request);
     String hashPassword(String password);
 
-    ResponseEntity<UserInfoResponse> changePassword(User user, ChangePasswordRequest request);
+    ResponseEntity<?> changePassword(User user, ChangePasswordRequest request);
 
-    void uploadProfile(User user, String upload);
+    ResponseEntity<?> uploadProfile(User user, String upload);
 
-    void deleteProfile(User user);
+    ResponseEntity<?> deleteProfile(User user);
 
 
 }

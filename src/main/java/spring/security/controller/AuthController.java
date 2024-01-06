@@ -1,13 +1,12 @@
 package spring.security.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.Errors;
@@ -18,8 +17,7 @@ import spring.security.common.exception.ExceptionStatusProvider;
 import spring.security.common.exception.docs.OtherServiceExceptionDocs;
 import spring.security.common.exception.docs.SignInExceptionDocs;
 import spring.security.common.exception.docs.SignUpExceptionDocs;
-import spring.security.common.exception.response.UserNotAuth;
-import spring.security.common.exception.response.UserNotFound;
+import spring.security.common.exception.response.ClientUnauthorizedException;
 import spring.security.config.jwt.JwtUtils;
 import spring.security.config.security.UserDetailsImpl;
 import spring.security.dto.request.ChangePasswordRequest;
@@ -27,7 +25,6 @@ import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
 import spring.security.dto.response.UserAndTokenResponse;
 import spring.security.dto.response.UserInfoResponse;
-import spring.security.repository.UserRepository;
 import spring.security.service.UserService;
 
 
@@ -86,28 +83,32 @@ public class AuthController {
 
     @Operation(summary = "Post Password Change", description = "회원의 비밀번호를 변경합니다")
     @PostMapping("/password-change") // TODO PatchMapping?
-    public ResponseEntity<UserInfoResponse> changePassword(@AuthenticationPrincipal UserDetailsImpl userDetails, @Validated @RequestBody ChangePasswordRequest request, Errors errors) {
+    public ResponseEntity<?> changePassword(@AuthenticationPrincipal UserDetailsImpl userDetails, @Validated @RequestBody ChangePasswordRequest request, Errors errors) {
         if (errors.hasErrors()) {
             ExceptionStatusProvider.throwError(errors);
         }
-        if (userDetails == null) {
-            throw UserNotAuth.EXCEPTION;
+        if (userDetails == null) { // TODO UserDetailsImpl null 인 경우 처리
+            throw ClientUnauthorizedException.EXCEPTION;
         }
         return userService.changePassword(userDetails.getUser(), request);
     }
-//
-//    @Operation(summary = "Post Profile Image", description = "회원의 프로필 이미지 등록 요청을 수행합니다")
-//    @PostMapping("/profile-img")
-//    public CodeMessageResponse uploadProfileImg(@AuthenticationPrincipal UserDetailsImpl userDetails, @Parameter(name="이미지 URL") @RequestParam("image") String imageURL) {
-//        userService.uploadProfile(userDetails.getUser(), imageURL);
-//        return message.getSuccessResponse();
-//    }
-//
-//    @Operation(summary = "Patch Password Change", description = "회원의 프로필 이미지 삭제 요청을 수행합니다")
-//    @PatchMapping("/delete/profile-img")
-//    public CodeMessageResponse deleteProfileImg(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        userService.deleteProfile(userDetails.getUser());
-//        return message.getSuccessResponse();
-//    }
+
+    @Operation(summary = "Post Profile Image", description = "회원의 프로필 이미지 등록 요청을 수행합니다")
+    @PostMapping("/profile-img")
+    public ResponseEntity<?> uploadProfileImg(@AuthenticationPrincipal UserDetailsImpl userDetails, @Parameter(name="이미지 URL") @RequestParam("image") String imageURL) {
+        if (userDetails == null) { // TODO UserDetailsImpl null 인 경우 처리
+            throw ClientUnauthorizedException.EXCEPTION;
+        }
+        return userService.uploadProfile(userDetails.getUser(), imageURL);
+    }
+
+    @Operation(summary = "Patch Password Change", description = "회원의 프로필 이미지 삭제 요청을 수행합니다")
+    @PatchMapping("/delete/profile-img")
+    public ResponseEntity<?> deleteProfileImg(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) { // TODO UserDetailsImpl null 인 경우 처리
+            throw ClientUnauthorizedException.EXCEPTION;
+        }
+        return userService.deleteProfile(userDetails.getUser());
+    }
 
 }

@@ -26,7 +26,7 @@ public enum AuthErrorCode implements BaseErrorCode{
     CLIENT_INVALID_PASSWORD(BAD_REQUEST, "AUTH_2101_2", "비밀번호는 8글자 이상 20글자 이하여야 합니다"),
 
     EXPIRED_TOKEN(UNAUTHORIZED, "AUTH_2102_1", "토큰이 만료되었습니다"),
-    USER_NOT_AUTH(UNAUTHORIZED, "AUTH_2012_2", "인증되지 않은 사용자입니다"),
+    CLIENT_UNAUTHORIZED(UNAUTHORIZED, "AUTH_2012_2", "인증되지 않은 사용자입니다"),
     EMPTY_TOKEN(UNAUTHORIZED, "AUTH_2102_3", "토큰이 존재하지 않습니다"),
     USER_ACCESS_DENIED(FORBIDDEN, "AUTH_2012_2", "접근 권한이 없습니다"),
 

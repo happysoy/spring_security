@@ -9,9 +9,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+import spring.security.common.exception.AuthErrorCode;
+import spring.security.common.exception.response.ClientUnauthorizedException;
 
-import java.awt.*;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,13 +32,16 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
         final Map<String, Object> body = new HashMap<>();
+        body.put("success", false);
         body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-        body.put("error", "Unauthorized");
-        body.put("message", authException.getMessage());
+        body.put("code", "AUTH_2012_2"); // AuthErrorCode 맞춰서 변경
+        body.put("message", AuthErrorCode.CLIENT_UNAUTHORIZED.getReason());
+//        body.put("timeStamp", LocalDateTime.now());
         body.put("path", request.getServletPath());
 
         final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), body);
+
     }
 
 }

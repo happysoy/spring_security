@@ -11,6 +11,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
+import spring.security.common.exception.request.ExpiredToken;
 import spring.security.domain.User;
 import spring.security.service.RedisService;
 
@@ -145,8 +146,10 @@ public class JwtUtils {
             return true;
         } catch (MalformedJwtException e) {
             log.error("Invalid JWT token={}", e.getMessage());
+
         } catch (ExpiredJwtException e) {
-            log.error("Jwt token is expired={}", e.getMessage());
+//            log.error("Jwt token is expired={}", e.getMessage());
+            throw ExpiredToken.EXCEPTION;
         } catch (UnsupportedJwtException e) {
             log.error("Jwt token is unsupported={}", e.getMessage());
         } catch (IllegalArgumentException e) {

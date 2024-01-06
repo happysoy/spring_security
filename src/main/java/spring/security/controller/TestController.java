@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import spring.security.common.annotation.ApiErrorException;
+import spring.security.common.exception.SuccessMessageResponse;
 import spring.security.common.exception.docs.OtherServiceExceptionDocs;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -24,7 +25,7 @@ public class TestController {
     @GetMapping("/user")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> userAccess() {
-        return ResponseEntity.ok().body(null);
+        return ResponseEntity.ok().body(new SuccessMessageResponse("User Content"));
     }
 
     @GetMapping("/admin")

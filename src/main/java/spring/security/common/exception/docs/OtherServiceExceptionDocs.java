@@ -7,7 +7,7 @@ import spring.security.common.exception.GlobalCustomException;
 import spring.security.common.exception.request.EmptyToken;
 import spring.security.common.exception.request.ExpiredToken;
 import spring.security.common.exception.request.UserAccessDenied;
-import spring.security.common.exception.response.UserNotAuth;
+import spring.security.common.exception.response.ClientUnauthorizedException;
 
 @ExceptionDoc
 public class OtherServiceExceptionDocs implements SwaggerException {
@@ -18,7 +18,7 @@ public class OtherServiceExceptionDocs implements SwaggerException {
     public GlobalCustomException 토큰_없음 = EmptyToken.EXCEPTION;
 
     @ExplainError("사용자 인증이 되지 않은 경우 - header에 인증 정보가 담기지 않음 or 로그인 안함")
-    public GlobalCustomException 인증_안됨 = UserNotAuth.EXCEPTION;
+    public GlobalCustomException 인증_안됨 = ClientUnauthorizedException.EXCEPTION;
 
     @ExplainError("접근 권한이 없는 경우")
     public GlobalCustomException 접근_권한_없음 = UserAccessDenied.EXCEPTION;
