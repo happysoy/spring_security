@@ -7,8 +7,7 @@ import spring.security.common.annotation.ExplainError;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
-import static spring.security.common.AuthStatic.BAD_REQUEST;
-import static spring.security.common.AuthStatic.UNAUTHORIZED;
+import static spring.security.common.AuthStatic.*;
 
 
 @Getter
@@ -27,7 +26,9 @@ public enum AuthErrorCode implements BaseErrorCode{
     CLIENT_INVALID_PASSWORD(BAD_REQUEST, "AUTH_2101_2", "비밀번호는 8글자 이상 20글자 이하여야 합니다"),
 
     EXPIRED_TOKEN(UNAUTHORIZED, "AUTH_2102_1", "토큰이 만료되었습니다"),
-    USER_ACCESS_DENIED(UNAUTHORIZED, "AUTH_2012_2", "접근 권한이 없습니다"),
+    USER_NOT_AUTH(UNAUTHORIZED, "AUTH_2012_2", "인증되지 않은 사용자입니다"),
+    EMPTY_TOKEN(UNAUTHORIZED, "AUTH_2102_3", "토큰이 존재하지 않습니다"),
+    USER_ACCESS_DENIED(FORBIDDEN, "AUTH_2012_2", "접근 권한이 없습니다"),
 
     /**
      * 2200: response 에러
@@ -35,7 +36,8 @@ public enum AuthErrorCode implements BaseErrorCode{
     DUPLICATE_EMAIL(BAD_REQUEST, "AUTH_2200_1", "이미 사용중인 이메일입니다"),
     INCORRECT_PASSWORD_CHECK(BAD_REQUEST, "AUTH_2200_2", "비밀번호와 비밀번호 확인이 일치하지 않습니다"),
     FAIL_LOGIN(BAD_REQUEST, "AUTH_2200_3", "아이디 또는 비밀번호를 확인해주세요"),
-    USER_NOT_FOUND(BAD_REQUEST, "AUTH_2200_4", "존재하지 않는 사용자입니다");
+    USER_NOT_FOUND(BAD_REQUEST, "AUTH_2200_4", "존재하지 않는 사용자입니다"),
+    RESPONSE_ERROR(INTERNAL_SERVER , "AUTH_2200_5", "값을 불러오는데 실패하였습니다.");
 
     private Integer status;
     private String code;

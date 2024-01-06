@@ -1,15 +1,16 @@
-package spring.security.common.exception;
+package spring.security.common.exception.docs;
 
 import spring.security.common.annotation.ExceptionDoc;
 import spring.security.common.annotation.ExplainError;
 import spring.security.common.annotation.SwaggerException;
+import spring.security.common.exception.GlobalCustomException;
 import spring.security.common.exception.request.*;
 import spring.security.common.exception.response.DuplicateEmail;
 import spring.security.common.exception.response.FailLogin;
 import spring.security.common.exception.response.IncorrectPasswordCheck;
 
 @ExceptionDoc
-public class AuthExceptionDocs implements SwaggerException {
+public class SignUpExceptionDocs implements SwaggerException {
 
     /**
      * request error
@@ -31,14 +32,6 @@ public class AuthExceptionDocs implements SwaggerException {
     @ExplainError("비밀번호 길이가 올바르지 않은 경우")
     public GlobalCustomException 비밀번호_길이_미준수 = ClientInvalidPassword.EXCEPTION;
 
-    @ExplainError("이메일 또는 비밀번호가 잘못된 경우")
-    public GlobalCustomException 로그인_실패 = FailLogin.EXCEPTION;
-
-    @ExplainError("refresh token이 만료되어 재로그인이 필요한 경우")
-    public GlobalCustomException 토큰_만료 = ExpiredToken.EXCEPTION;
-
-    @ExplainError("접근 권한이 없는 경우")
-    public GlobalCustomException 접근_권한_없음 = UserAccessDenied.EXCEPTION;
 
     /**
      * response error

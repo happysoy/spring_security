@@ -1,4 +1,4 @@
-package spring.security.config;
+package spring.security.config.swagger;
 
 import io.swagger.v3.oas.models.examples.Example;
 import lombok.Builder;

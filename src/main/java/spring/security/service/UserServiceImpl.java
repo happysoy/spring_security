@@ -7,13 +7,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import spring.security.common.exception.GlobalCustomException;
-import spring.security.common.exception.MessageResponse;
-import spring.security.common.exception.request.ClientInvalidPassword;
+import spring.security.common.exception.request.EmptyToken;
 import spring.security.common.exception.request.ExpiredToken;
 import spring.security.common.exception.response.*;
 import spring.security.config.jwt.JwtUtils;
@@ -23,6 +23,7 @@ import spring.security.domain.User;
 import spring.security.dto.request.ChangePasswordRequest;
 import spring.security.dto.request.SignInRequest;
 import spring.security.dto.request.SignUpRequest;
+import spring.security.dto.response.UserAndTokenResponse;
 import spring.security.dto.response.UserInfoResponse;
 import spring.security.repository.UserRepository;
 
@@ -68,10 +69,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ResponseEntity<?> signIn(SignInRequest request) {
+    public ResponseEntity<UserAndTokenResponse> signIn(SignInRequest request) {
         // 이메일 존재 확인
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> UserNotFound.EXCEPTION);
+                .orElseThrow(() -> FailLogin.EXCEPTION);
 
         // 유효한 이메일, 비밀번호인지 확인
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
@@ -93,11 +94,15 @@ public class UserServiceImpl implements UserService {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
-                .body(new UserInfoResponse(user.getUsername(), user.getEmail()));
+                .body(UserAndTokenResponse.builder()
+                        .username(user.getUsername())
+                        .accessToken(jwtAccessCookie.toString())
+                        .refreshToken(refreshToken)
+                        .build());
     }
 
     @Override
-    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+    public ResponseEntity<UserAndTokenResponse> refreshToken(HttpServletRequest request) {
         String refreshToken = jwtUtils.getRefreshJwtFromCookies(request);
 
         if ((refreshToken != null) && (!refreshToken.isEmpty())) {
@@ -107,11 +112,12 @@ public class UserServiceImpl implements UserService {
                         ResponseCookie jwtAccessCookie = jwtUtils.generateAccessJwtCookie(new UserDetailsImpl(user).getUser());
                         return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
-                                .body(new MessageResponse("access token 재발급 성공"));
+                                .body(new UserAndTokenResponse(jwtAccessCookie.toString(), refreshToken, user.getUsername()));
                     })
                     .orElseThrow(() -> ExpiredToken.EXCEPTION);
         }
-        return ResponseEntity.badRequest().body(new MessageResponse("refresh token이 http cookie에 없습니다"));
+        // refresh token 만료 -> 재로그인 필요
+        throw EmptyToken.EXCEPTION;
     }
 
     @Override
@@ -129,7 +135,7 @@ public class UserServiceImpl implements UserService {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cleanJwtAccessCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, cleanJwtRefreshCookie.toString())
-                .body(new MessageResponse("로그아웃 성공"));
+                .body(null);
 
     }
 
@@ -141,7 +147,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void changePassword(User user, ChangePasswordRequest request) {
+    public ResponseEntity<UserInfoResponse> changePassword(User user, ChangePasswordRequest request) {
         // 비밀번호 != 비밀번호 확인
         if (!Objects.equals(request.password(), request.passwordCheck())) {
             throw IncorrectPasswordCheck.EXCEPTION;
@@ -149,6 +155,14 @@ public class UserServiceImpl implements UserService {
 
         user.changePassword(hashPassword(request.password()));
         userRepository.save(user);
+
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
+//                .body(new UserAndTokenResponse(jwtAccessCookie.toString(), refreshToken, user.getUsername()));
+//    })
+
+        return ResponseEntity.ok() // TODO userinforesponse안에 builder 넣기
+                .body(new UserInfoResponse(user.getUsername(), user.getEmail()));
     }
 
     @Override

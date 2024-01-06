@@ -1,4 +1,4 @@
-package spring.security.config;
+package spring.security.config.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

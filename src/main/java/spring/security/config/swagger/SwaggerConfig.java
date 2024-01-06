@@ -1,4 +1,4 @@
-package spring.security.config;
+package spring.security.config.swagger;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -23,6 +23,7 @@ import spring.security.common.exception.BaseErrorCode;
 import spring.security.common.exception.GlobalCustomException;
 import spring.security.common.exception.ErrorReason;
 import spring.security.common.exception.ErrorResponse;
+import spring.security.config.swagger.ExampleHolder;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -45,7 +46,6 @@ public class SwaggerConfig {
 
     private final ApplicationContext applicationContext;
 
-
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
@@ -60,24 +60,23 @@ public class SwaggerConfig {
 
     @Bean
     public OperationCustomizer customize() {
-        return (Operation operation, HandlerMethod handlerMethod) -> {
+        return (operation, handlerMethod) -> {
             ApiErrorException apiErrorExceptionsExample =
                     handlerMethod.getMethodAnnotation(ApiErrorException.class);
             ApiErrorCode apiErrorCodeExample =
                     handlerMethod.getMethodAnnotation(ApiErrorCode.class);
 
-//             ApiErrorExceptions 어노테이션 단 메소드 적용
             if (apiErrorExceptionsExample != null) {
                 generateExceptionResponse(operation, apiErrorExceptionsExample.value());
             }
-            // ApiErrorCode 어노테이션 단 메소드 적용
+
             if (apiErrorCodeExample != null) {
                 generateErrorCodeResponse(operation, apiErrorCodeExample.value());
             }
+
             return operation;
         };
     }
-
     /**
      * BaseErrorCode 타입의 enum 문서화
      */
@@ -85,63 +84,58 @@ public class SwaggerConfig {
         ApiResponses responses = operation.getResponses();
         BaseErrorCode[] errorCodes = type.getEnumConstants();
 
-        Map<Integer, List<ExampleHolder>> statusWithExampleHolders =
-                Arrays.stream(errorCodes)
-                        .map(
-                                baseErrorCode -> {
-                                    try {
-                                        ErrorReason errorReason = baseErrorCode.getErrorReason();
-                                        return ExampleHolder.builder()
-                                                .holder(
-                                                        getSwaggerExample(
-                                                                baseErrorCode.getExplainError(),
-                                                                errorReason))
-                                                .code(errorReason.status())
-                                                .name(errorReason.code())
-                                                .build();
-                                    } catch (NoSuchFieldException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                })
-                        .collect(groupingBy(ExampleHolder::code));
+        Map<Integer, List<ExampleHolder>> statusWithExampleHolders = Arrays.stream(errorCodes)
+                .map(this::createExampleHolderForErrorCode)
+                .collect(groupingBy(ExampleHolder::code));
 
         addExamplesToResponses(responses, statusWithExampleHolders);
+    }
 
+    private ExampleHolder createExampleHolderForErrorCode(BaseErrorCode baseErrorCode) {
+        try {
+            ErrorReason errorReason = baseErrorCode.getErrorReason();
+            return ExampleHolder.builder()
+                    .holder(getSwaggerExample(baseErrorCode.getExplainError(), errorReason))
+                    .code(errorReason.status())
+                    .name(errorReason.code())
+                    .build();
+        } catch (NoSuchFieldException e) {
+            throw new IllegalArgumentException("Invalid field while accessing BaseErrorCode: " + e.getMessage(), e);
+        }
     }
     private void generateExceptionResponse(Operation operation, Class<?> type) {
         ApiResponses responses = operation.getResponses();
 
         Object bean = applicationContext.getBean(type);
-        Field[] declaredFields = bean.getClass().getDeclaredFields();
-        Map<Integer, List<ExampleHolder>> statusWithExampleHolders =
-                Arrays.stream(declaredFields)
-                        .filter(field -> field.getAnnotation(ExplainError.class) != null)
-                        .filter(field -> field.getType() == GlobalCustomException.class)
-                        .map(
-                                field -> {
-                                    try {
-                                        GlobalCustomException exception =
-                                                (GlobalCustomException) field.get(bean);
-                                        ExplainError annotation =
-                                                field.getAnnotation(ExplainError.class);
-                                        String value = annotation.value();
-                                        ErrorReason errorReason = exception.getErrorReason();
-                                        return ExampleHolder.builder()
-                                                .holder(getSwaggerExample(value, errorReason))
-                                                .code(errorReason.status())
-                                                .name(field.getName())
-                                                .build();
-                                    } catch (IllegalAccessException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                })
-                        .collect(groupingBy(ExampleHolder::code));
+
+        Map<Integer, List<ExampleHolder>> statusWithExampleHolders = Arrays.stream(bean.getClass().getDeclaredFields())
+                .filter(field -> field.getAnnotation(ExplainError.class) != null)
+                .filter(field -> field.getType() == GlobalCustomException.class)
+                .map(field -> createExampleHolderForException(field, bean))
+                .collect(groupingBy(ExampleHolder::code));
 
         addExamplesToResponses(responses, statusWithExampleHolders);
     }
 
+
+    private ExampleHolder createExampleHolderForException(Field field, Object bean) {
+        try {
+            GlobalCustomException exception = (GlobalCustomException) field.get(bean);
+            ExplainError annotation = field.getAnnotation(ExplainError.class);
+            String value = annotation.value();
+            ErrorReason errorReason = exception.getErrorReason();
+            return ExampleHolder.builder()
+                    .holder(getSwaggerExample(value, errorReason))
+                    .code(errorReason.status())
+                    .name(field.getName())
+                    .build();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private Example getSwaggerExample(String value, ErrorReason errorReason) {
-        ErrorResponse errorResponse = new ErrorResponse(errorReason, "요청시 패스정보입니다.");
+        ErrorResponse errorResponse = new ErrorResponse(errorReason, "요청한 URL 정보 (ex.\"http://localhost:8080/api/auth/signup\")");
         Example example = new Example();
         example.description(value);
         example.setValue(errorResponse);
